@@ -18,6 +18,7 @@ export async function fetchClaude(userMessage, cascadeState) {
   const data = await response.json();
 
   console.log("Claude response:", data);
+  console.log("Cascade state sent to LLM:", cascadeState);
 
   // handle proxy errors forwarded from server
   if (data.error || data.type === "error") {

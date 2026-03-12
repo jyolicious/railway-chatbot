@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { fetchClaude } from "../logic/claudeClient";
+import { useCascade } from "../context/CascadeContext";
+
+
 
 export default function AssistantPanel() {
 
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const { cascadeState } = useCascade();
 
   const mockCascadeState = {
     trigger_station: "NGP",
@@ -22,7 +26,7 @@ export default function AssistantPanel() {
     setLoading(true);
 
     try {
-      const result = await fetchClaude(message, mockCascadeState);
+      const result = await fetchClaude(message, cascadeState);
       setResponse(result);
     } catch (err) {
       console.error(err);

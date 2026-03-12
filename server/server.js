@@ -58,6 +58,22 @@ app.post("/ask", async (req, res) => {
 
 });
 
+app.get("/cascade-state", (req, res) => {
+
+  const state = {
+    activeCascade: true,
+    affectedStations: ["NGP","BPL","JHS","NDLS"],
+    affectedTrains: ["12952","12269"],
+    passengerCount: 18200,
+    waitlistUpdates: {
+      "12952": { "WL12": "HIGH_RISK" }
+    }
+  };
+
+  res.json(state);
+
+});
+
 app.listen(3000, () => {
   console.log("Groq AI server running on port 3000");
 });
