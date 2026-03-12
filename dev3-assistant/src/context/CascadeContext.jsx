@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { calculateImpact } from "../logic/impactCalculator";
 
 const CascadeContext = createContext();
 
@@ -14,22 +15,32 @@ export function CascadeProvider({ children }) {
     lastUpdate: null
   });
 
+  const [impactMetrics, setImpactMetrics] = useState(null);
+
   async function fetchCascadeState() {
+
     try {
 
       const res = await fetch("http://localhost:3000/cascade-state");
       const data = await res.json();
 
-      setCascadeState({
+      const updatedState = {
         ...data,
         lastUpdate: Date.now()
-      });
+      };
+
+      setCascadeState(updatedState);
+
+      const impact = calculateImpact(updatedState);
+
+      setImpactMetrics(impact);
 
     } catch (err) {
 
       console.error("Cascade fetch failed:", err);
 
     }
+
   }
 
   useEffect(() => {
@@ -43,7 +54,9 @@ export function CascadeProvider({ children }) {
   }, []);
 
   return (
-    <CascadeContext.Provider value={{ cascadeState, setCascadeState }}>
+    <CascadeContext.Provider
+      value={{ cascadeState, impactMetrics, setCascadeState }}
+    >
       {children}
     </CascadeContext.Provider>
   );

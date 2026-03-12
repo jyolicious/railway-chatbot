@@ -1,5 +1,6 @@
 import AssistantPanel from "./components/AssistantPanel";
 import CascadeDebug from "./components/CascadeDebug";
+import PassengerImpactPanel from "./components/PassengerImpactPanel";
 
 function App() {
 
@@ -7,6 +8,7 @@ function App() {
     <div>
       <CascadeDebug />
       <AssistantPanel />
+      <PassengerImpactPanel />
     </div>
   );
 
