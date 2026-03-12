@@ -12,50 +12,75 @@ export function CascadeProvider({ children }) {
     passengerCount: 0,
     waitlistUpdates: {},
     cascadeTree: {},
-    lastUpdate: null
+    lastUpdate: null,
+    trigger_station: null,
+    delay_minutes: 0,
+    disrupted_trains: []
   });
 
   const [impactMetrics, setImpactMetrics] = useState(null);
 
-  async function fetchCascadeState() {
+  // Update impact metrics whenever cascade state changes
+  useEffect(() => {
+    const impact = calculateImpact(cascadeState);
+    setImpactMetrics(impact);
+  }, [cascadeState]);
 
-    try {
-
-      const res = await fetch("http://localhost:3000/cascade-state");
-      const data = await res.json();
-
-      const updatedState = {
-        ...data,
-        lastUpdate: Date.now()
-      };
-
-      setCascadeState(updatedState);
-
-      const impact = calculateImpact(updatedState);
-
-      setImpactMetrics(impact);
-
-    } catch (err) {
-
-      console.error("Cascade fetch failed:", err);
-
-    }
-
+  function updateCascadeState(updates) {
+    setCascadeState(prev => ({
+      ...prev,
+      ...updates,
+      lastUpdate: Date.now()
+    }));
   }
 
-  useEffect(() => {
+  function triggerCascade(scenario) {
+    /**
+     * Trigger a new cascade with the given scenario data.
+     * This is called by scenarioLoader when a cascade starts.
+     */
+    setCascadeState({
+      activeCascade: true,
+      affectedStations: [scenario.trigger_station],
+      affectedTrains: scenario.disrupted_trains || [],
+      passengerCount: scenario.passengers || 0,
+      trigger_station: scenario.trigger_station,
+      delay_minutes: scenario.delay_minutes,
+      disrupted_trains: scenario.disrupted_trains || [],
+      waitlistUpdates: {},
+      cascadeTree: scenario,
+      lastUpdate: Date.now()
+    });
+  }
 
-    fetchCascadeState();
-
-    const interval = setInterval(fetchCascadeState, 3000);
-
-    return () => clearInterval(interval);
-
-  }, []);
+  function clearCascade() {
+    /**
+     * Reset cascade state to idle.
+     */
+    setCascadeState({
+      activeCascade: false,
+      affectedStations: [],
+      affectedTrains: [],
+      passengerCount: 0,
+      waitlistUpdates: {},
+      cascadeTree: {},
+      lastUpdate: null,
+      trigger_station: null,
+      delay_minutes: 0,
+      disrupted_trains: []
+    });
+  }
 
   return (
     <CascadeContext.Provider
-      value={{ cascadeState, impactMetrics, setCascadeState }}
+      value={{
+        cascadeState,
+        impactMetrics,
+        setCascadeState,
+        updateCascadeState,
+        triggerCascade,
+        clearCascade
+      }}
     >
       {children}
     </CascadeContext.Provider>
